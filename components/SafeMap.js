@@ -35,6 +35,41 @@ const styles = StyleSheet.create({
         }
 });
 
+//const pins =
+//errorCB(err) {
+//  console.log("SQL Error: " + err);
+//},
+//
+//successCB() {
+//  console.log("SQL executed fine");
+//},
+//
+//openCB() {
+//  console.log("Database OPENED");
+//},
+//
+//var db = SQLite.openDatabase("./../Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
+//db.transaction((tx) => {
+//  tx.executeSql('SELECT * FROM offenders', [], (tx, results) => {
+//      console.log("Query completed");
+//
+//      // Get rows with Web SQL Database spec compliance.
+//
+//      var len = results.rows.length;
+//      for (let i = 0; i < len; i++) {
+//        let row = results.rows.item(i);
+//        console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`);
+//      }
+//
+//      // Alternatively, you can use the non-standard raw method.
+//
+//      /*
+//        let rows = results.rows.raw(); // shallow copy of rows Array
+//
+//        rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
+//      */
+//    });
+//});
 
 class SafeMap extends Component {
 
