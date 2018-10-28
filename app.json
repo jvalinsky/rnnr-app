@@ -27,5 +27,8 @@
   "packagerOpts": {
     "assetExts": ["db", "sqlite", "db.sqlite"]
   },
+  "splash": {
+    "image": "./assets/homepage.png"
+  }
   }
 }
