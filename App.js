@@ -5,13 +5,12 @@ import SafeMap from './components/SafeMap.js';
 export default class App extends React.Component {
 	render() {
 		return (
-            <View style={styles.container}>
-                <SafeMap />
-            </View>
+			<SafeMap />
         );
 	}
 }
 
+    /*
 const styles = StyleSheet.create({
 	container: { flex: 1,
     	backgroundColor: '#fff',
@@ -19,3 +18,5 @@ const styles = StyleSheet.create({
     	justifyContent: 'center',
     },
 });
+
+*/
