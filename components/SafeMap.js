@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, View, TextInput } from 'react-native';
-import { Location, Permissions, MapView } from 'expo';
+import { Location, Permissions, MapView, SQLite } from 'expo';
 import { Callout } from 'react-native-maps';
 
 const LATITUDE_DELTA = 0.0922;
@@ -36,18 +36,18 @@ const styles = StyleSheet.create({
 });
 
 //const pins =
-//errorCB(err) {
-//  console.log("SQL Error: " + err);
-//},
-//
-//successCB() {
-//  console.log("SQL executed fine");
-//},
-//
-//openCB() {
-//  console.log("Database OPENED");
-//},
-//
+function errorCB(err) {
+  console.log("SQL Error: " + err);
+}
+
+function successCB() {
+  console.log("SQL executed fine");
+}
+
+function openCB() {
+  console.log("Database OPENED");
+}
+
 
 var DB = SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
 
@@ -82,7 +82,7 @@ class SafeMap extends Component {
 
     query() {
 
-db.transaction((tx) => {
+DB.transaction((tx) => {
   tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' ", [], (tx, results) => {
       console.log("Query completed");
 
@@ -97,7 +97,7 @@ db.transaction((tx) => {
               latitude: row.lat,
               longitude: row.long
           };
-        coordinates.push(coord);
+        coordinates.push({coordinate: coord});
 
       }
       let user_loc =  {
@@ -105,7 +105,7 @@ db.transaction((tx) => {
           longitude: this.state.region.longitude
       }
 
-      coordinates.push(user_loc);
+      coordinates.push({coordinate: user_loc});
       this.setState({markers: coordinates});
 
       // Alternatively, you can use the non-standard raw method.
