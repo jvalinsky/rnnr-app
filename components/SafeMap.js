@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, View, TextInput } from 'react-native';
-import { Location, Permissions, MapView, SQLite } from 'expo';
+import { Location, Permissions, MapView, SQLite, FileSystem, Asset } from 'expo';
 import { Callout } from 'react-native-maps';
 
 const LATITUDE_DELTA = 0.0922;
@@ -49,7 +49,7 @@ function openCB() {
 }
 
 
-var DB = SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
+var DB = null; //= SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
 
 //function query_db() {
 
@@ -73,31 +73,46 @@ class SafeMap extends Component {
             errorMessage: null,
             watchId: null,
         }
+        //FileSystem.documentDirectory
+        this._loadDBAsync();
+        console.log(FileSystem.documentDirectory);
     }
 
     componentDidMount() {
         this._getLocationAsync(); 
-        this.query();
     }
 
-    query() {
+    _loadDBAsync = async () => {
+        await FileSystem.downloadAsync(
+            Asset.fromModule(require('../assets/db/Rnnr.db.sqlite')).uri,
+		    `${FileSystem.documentDirectory}Rnnr.db.sqlite`
+        );
 
-DB.transaction((tx) => {
-  tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' ", [], (tx, results) => {
+        console.log('Finished downloading ' + `${FileSystem.documentDirectory}Rnnr.db.sqlite`
+);
+        DB = SQLite.openDatabase('Rnnr.db.sqlite'
+, "3.0", "Rnnr Database", 200000, openCB, errorCB);
+        await this._queryAsync();
+    }
+
+    _queryAsync = async () => {
+        console.log("query is being called");
+
+DB.transaction((tx, results) => {
+    tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' AND lat IS NOT NULL", [], (tx, results) => {
       console.log("Query completed");
 
       // Get rows with Web SQL Database spec compliance.
 
       var len = results.rows.length;
       var coordinates = [];
+      console.log("results #: " + results.length);
       for (let i = 0; i < len; i++) {
         let row = results.rows.item(i);
           console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
-          var coord = {
-              latitude: row.lat,
-              longitude: row.long
-          };
-        coordinates.push({coordinate: coord});
+        if(row.lat !== null) {
+            coordinates.push({coordinate: {latitude: row.lat, longitude: row.lon}});
+            }
 
       }
       let user_loc =  {
@@ -115,8 +130,9 @@ DB.transaction((tx) => {
 
         rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
       */
-    });
-});
+    }
+, (err) => { console.log(err)});
+}, (err) => {console.log("error: " + err)}, () => {console.log("success")});
 } 
 
    _updateLocation = async (location) => {
