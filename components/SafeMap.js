@@ -117,13 +117,12 @@ class SafeMap extends Component {
     render() {
         return (
 			<View style={styles.container}>
-            <MapView style={styles.map} initialRegion={this.state.region}>
-                <MapView.Marker
-                    coordinate= {{
-                        latitude: this.state.region.latitude,
-                        longitude: this.state.region.longitude
-                    }}
-                />
+                <MapView style={styles.map} initialRegion={this.state.region}>
+                    {this.state.markers.map(marker => (
+            			<MapView.Marker
+              				coordinate={marker.coordinate}
+            			/>
+          			))}
             </ MapView>
   			<Callout>
           		<View style={styles.calloutView} >
@@ -139,3 +138,16 @@ class SafeMap extends Component {
 };
 
 export default SafeMap;
+
+
+//select lat, lon from offenders where city == Bronx
+// success function callback, takes transaction and result set object
+//
+
+/*
+coordinate= {{
+                            latitude: this.state.region.latitude,
+                            longitude: this.state.region.longitude
+                        }}
+
+*/
