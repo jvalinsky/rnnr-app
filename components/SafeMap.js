@@ -48,28 +48,15 @@ const styles = StyleSheet.create({
 //  console.log("Database OPENED");
 //},
 //
-//var db = SQLite.openDatabase("./../Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
-//db.transaction((tx) => {
-//  tx.executeSql('SELECT * FROM offenders', [], (tx, results) => {
-//      console.log("Query completed");
-//
-//      // Get rows with Web SQL Database spec compliance.
-//
-//      var len = results.rows.length;
-//      for (let i = 0; i < len; i++) {
-//        let row = results.rows.item(i);
-//        console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`);
-//      }
-//
-//      // Alternatively, you can use the non-standard raw method.
-//
-//      /*
-//        let rows = results.rows.raw(); // shallow copy of rows Array
-//
-//        rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
-//      */
-//    });
-//});
+
+var DB = SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
+
+//function query_db() {
+
+//}
+
+
+
 
 class SafeMap extends Component {
 
@@ -90,7 +77,47 @@ class SafeMap extends Component {
 
     componentDidMount() {
         this._getLocationAsync(); 
+        this.query();
     }
+
+    query() {
+
+db.transaction((tx) => {
+  tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' ", [], (tx, results) => {
+      console.log("Query completed");
+
+      // Get rows with Web SQL Database spec compliance.
+
+      var len = results.rows.length;
+      var coordinates = [];
+      for (let i = 0; i < len; i++) {
+        let row = results.rows.item(i);
+          console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
+          var coord = {
+              latitude: row.lat,
+              longitude: row.long
+          };
+        coordinates.push(coord);
+
+      }
+      let user_loc =  {
+          latitude: this.state.region.latitude,
+          longitude: this.state.region.longitude
+      }
+
+      coordinates.push(user_loc);
+      this.setState({markers: coordinates});
+
+      // Alternatively, you can use the non-standard raw method.
+
+      /*
+        let rows = results.rows.raw(); // shallow copy of rows Array
+
+        rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
+      */
+    });
+});
+} 
 
    _updateLocation = async (location) => {
        this.setState({
@@ -152,13 +179,12 @@ class SafeMap extends Component {
     render() {
         return (
 			<View style={styles.container}>
-            <MapView style={styles.map} initialRegion={this.state.region}>
-                <MapView.Marker
-                    coordinate= {{
-                        latitude: this.state.region.latitude,
-                        longitude: this.state.region.longitude
-                    }}
-                />
+                <MapView style={styles.map} initialRegion={this.state.region}>
+                    {this.state.markers.map(marker => (
+            			<MapView.Marker
+              				coordinate={marker.coordinate}
+            			/>
+          			))}
             </ MapView>
   			<Callout>
           		<View style={styles.calloutView} >
@@ -174,3 +200,16 @@ class SafeMap extends Component {
 };
 
 export default SafeMap;
+
+
+//select lat, lon from offenders where city == Bronx
+// success function callback, takes transaction and result set object
+//
+
+/*
+coordinate= {{
+                            latitude: this.state.region.latitude,
+                            longitude: this.state.region.longitude
+                        }}
+
+*/
