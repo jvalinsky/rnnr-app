@@ -99,7 +99,7 @@ class SafeMap extends Component {
         console.log("query is being called");
 
 DB.transaction((tx, results) => {
-    tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' AND lat IS NOT NULL", [], (tx, results) => {
+    tx.executeSql("SELECT lat, lon FROM offenders  WHERE lat IS NOT NULL", [], (tx, results) => {
       console.log("Query completed");
 
       // Get rows with Web SQL Database spec compliance.
@@ -111,7 +111,7 @@ DB.transaction((tx, results) => {
         let row = results.rows.item(i);
           console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
         if(row.lat !== null) {
-            coordinates.push({coordinate: {latitude: row.lat, longitude: row.lon}});
+            coordinates.push({key: (i+1), pinColor: '#ff0000', coordinate: {latitude: row.lat, longitude: row.lon}});
             }
 
       }
@@ -120,7 +120,7 @@ DB.transaction((tx, results) => {
           longitude: this.state.region.longitude
       }
 
-      coordinates.push({coordinate: user_loc});
+      coordinates.push({key: 0, pinColor: '#0000ff', coordinate: user_loc});
       this.setState({markers: coordinates});
 
       // Alternatively, you can use the non-standard raw method.
@@ -198,7 +198,9 @@ DB.transaction((tx, results) => {
                 <MapView style={styles.map} initialRegion={this.state.region}>
                     {this.state.markers.map(marker => (
             			<MapView.Marker
-              				coordinate={marker.coordinate}
+                            coordinate={marker.coordinate}
+                            pinColor={marker.pinColor}
+                            key={marker.key}
             			/>
           			))}
             </ MapView>
