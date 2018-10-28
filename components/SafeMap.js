@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, View, TextInput } from 'react-native';
-import { Location, Permissions, MapView, SQLite, FileSystem } from 'expo';
+import { Location, Permissions, MapView, SQLite, FileSystem, Asset } from 'expo';
 import { Callout } from 'react-native-maps';
 
 const LATITUDE_DELTA = 0.0922;
@@ -74,9 +74,7 @@ class SafeMap extends Component {
             watchId: null,
         }
         //FileSystem.documentDirectory
-
-        DB = SQLite.openDatabase(FileSystem.documentDirectory + "Rnnr.db.sqlite", "3.0", "Rnnr Database", 200000, openCB, errorCB);
-        this._queryAsync();
+        this._loadDBAsync();
         console.log(FileSystem.documentDirectory);
     }
 
@@ -84,7 +82,24 @@ class SafeMap extends Component {
         this._getLocationAsync(); 
     }
 
-    sucess(tx, results) {
+    _loadDBAsync = async () => {
+        await FileSystem.downloadAsync(
+            Asset.fromModule(require('../assets/db/Rnnr.db.sqlite')).uri,
+		    `${FileSystem.documentDirectory}Rnnr.db.sqlite`
+        );
+
+        console.log('Finished downloading ' + `${FileSystem.documentDirectory}Rnnr.db.sqlite`
+);
+        DB = SQLite.openDatabase('Rnnr.db.sqlite'
+, "3.0", "Rnnr Database", 200000, openCB, errorCB);
+        await this._queryAsync();
+    }
+
+    _queryAsync = async () => {
+        console.log("query is being called");
+
+DB.transaction((tx, results) => {
+    tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' AND lat IS NOT NULL", [], (tx, results) => {
       console.log("Query completed");
 
       // Get rows with Web SQL Database spec compliance.
@@ -95,11 +110,9 @@ class SafeMap extends Component {
       for (let i = 0; i < len; i++) {
         let row = results.rows.item(i);
           console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
-          var coord = {
-              latitude: row.lat,
-              longitude: row.long
-          };
-        coordinates.push({coordinate: coord});
+        if(row.lat !== null) {
+            coordinates.push({coordinate: {latitude: row.lat, longitude: row.lon}});
+            }
 
       }
       let user_loc =  {
@@ -118,12 +131,7 @@ class SafeMap extends Component {
         rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
       */
     }
-
-    _queryAsync = async () => {
-        console.log("query is being called");
-
-DB.transaction((tx) => {
-    tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' AND lat IS NOT NULL", [], this.success, (err) => { console.log(err)});
+, (err) => { console.log(err)});
 }, (err) => {console.log("error: " + err)}, () => {console.log("success")});
 } 
 

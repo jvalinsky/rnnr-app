@@ -18,13 +18,14 @@
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
-      "**/*"
+      "**/*",
+       "assets/db/*"
     ],
     "ios": {
       "supportsTablet": true
     },
   "packagerOpts": {
-    "assetExts": ["db", "sqlite"]
-  }
+    "assetExts": ["db", "sqlite", "db.sqlite"]
+  },
   }
 }
