@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Alert, View, TextInput } from 'react-native';
-import { Location, Permissions, MapView, SQLite } from 'expo';
+import { Location, Permissions, MapView, SQLite, FileSystem } from 'expo';
 import { Callout } from 'react-native-maps';
 
 const LATITUDE_DELTA = 0.0922;
@@ -49,7 +49,7 @@ function openCB() {
 }
 
 
-var DB = SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
+var DB = null; //= SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
 
 //function query_db() {
 
@@ -73,23 +73,25 @@ class SafeMap extends Component {
             errorMessage: null,
             watchId: null,
         }
+        //FileSystem.documentDirectory
+
+        DB = SQLite.openDatabase(FileSystem.documentDirectory + "Rnnr.db.sqlite", "3.0", "Rnnr Database", 200000, openCB, errorCB);
+        this._queryAsync();
+        console.log(FileSystem.documentDirectory);
     }
 
     componentDidMount() {
         this._getLocationAsync(); 
-        this.query();
     }
 
-    query() {
-
-DB.transaction((tx) => {
-  tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' ", [], (tx, results) => {
+    sucess(tx, results) {
       console.log("Query completed");
 
       // Get rows with Web SQL Database spec compliance.
 
       var len = results.rows.length;
       var coordinates = [];
+      console.log("results #: " + results.length);
       for (let i = 0; i < len; i++) {
         let row = results.rows.item(i);
           console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
@@ -115,8 +117,14 @@ DB.transaction((tx) => {
 
         rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
       */
-    });
-});
+    }
+
+    _queryAsync = async () => {
+        console.log("query is being called");
+
+DB.transaction((tx) => {
+    tx.executeSql("SELECT lat, lon FROM offenders WHERE city LIKE '%bronx%' AND lat IS NOT NULL", [], this.success, (err) => { console.log(err)});
+}, (err) => {console.log("error: " + err)}, () => {console.log("success")});
 } 
 
    _updateLocation = async (location) => {
