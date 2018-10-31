@@ -19,13 +19,14 @@
     },
     "assetBundlePatterns": [
       "**/*",
-       "assets/db/*"
+       "assets/db/*",
+       "assets/*"
     ],
     "ios": {
       "supportsTablet": true
     },
   "packagerOpts": {
-    "assetExts": ["db", "sqlite", "db.sqlite"]
+    "assetExts": ["db", "sqlite", "db.sqlite", "png"]
   },
   "splash": {
     "image": "./assets/homepage.png"

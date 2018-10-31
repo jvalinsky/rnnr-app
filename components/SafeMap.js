@@ -55,11 +55,7 @@ function openCB() {
   console.log("Database OPENED");
 }
 
-var DB = null; //= SQLite.openDatabase("file://Rnnr.db.sqlite", "1.0", "Rnnr Database", 200000, openCB, errorCB);
-
-//function query_db() {
-
-//}
+var DB = null;
 
 class SafeMap extends Component {
   constructor(props) {
@@ -75,14 +71,17 @@ class SafeMap extends Component {
       errorMessage: null,
       watchId: null
     };
-    //FileSystem.documentDirectory
+
     this._loadDBAsync();
     console.log(FileSystem.documentDirectory);
+    this._loadRunAsync();
   }
 
   componentDidMount() {
     this._getLocationAsync();
   }
+
+  _loadRunAsync = async () => {};
 
   _loadDBAsync = async () => {
     await FileSystem.downloadAsync(
@@ -143,14 +142,6 @@ class SafeMap extends Component {
               coordinate: user_loc
             });
             this.setState({ markers: coordinates });
-
-            // Alternatively, you can use the non-standard raw method.
-
-            /*
-        let rows = results.rows.raw(); // shallow copy of rows Array
-
-        rows.map(row => console.log(`Employee name: ${row.name}, Dept Name: ${row.deptName}`));
-        */
           },
           err => {
             console.log(err);

@@ -6,7 +6,10 @@ import {
   Button,
   ActivityIndicator,
   AsyncStorage,
-  StatusBar
+  StatusBar,
+  TouchableOpacity,
+  Image,
+  Switch
 } from "react-native";
 import { Constants, WebBrowser, AuthSession } from "expo";
 import {
@@ -18,6 +21,16 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import SafeMap from "./components/SafeMap.js";
 
 const STRAVA_CLIENT_ID = 29699;
+
+const styles = StyleSheet.create({
+  button: {
+    alignItems: "center",
+    backgroundColor: "#DDDDDD",
+    padding: 12,
+    borderRadius: 3,
+    marginTop: 5
+  }
+});
 
 class HomeScreen extends React.Component {
   static navigationOptions = { title: "Home" };
@@ -39,7 +52,7 @@ class HomeScreen extends React.Component {
   render() {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <SafeMap />
+        <SafeMap userToken={this.state.token} />
       </View>
     );
   }
@@ -62,6 +75,7 @@ class SettingsScreen extends React.Component {
           onPress={() => this.props.navigation.navigate("Home")}
         />
         <Button title="Actually, sign me out :)" onPress={this._signOutAsync} />
+        <Switch />
       </View>
     );
   }
@@ -101,14 +115,14 @@ class SignInScreen extends React.Component {
   render() {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Button
-          title="Don't use Strava, just take me to the app"
-          onPress={this._signInAsync}
-        />
-        <Button
-          title="Sign In with Strava"
-          onPress={this._handlePressButtonAsync}
-        />
+        <TouchableOpacity onPress={this._stravaSignInAsync}>
+          <Image
+            source={require("./assets/btn_strava_connectwith_orange.png")}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={this._signInAsync}>
+          <Text> Just take me to the app </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -116,7 +130,7 @@ class SignInScreen extends React.Component {
   _signInAsync = async () => {
     this.props.navigation.navigate("App");
   };
-  _handlePressButtonAsync = async () => {
+  _stravaSignInAsync = async () => {
     let redirectUrl = AuthSession.getRedirectUrl();
     console.log(redirectUrl);
     let result = await AuthSession.startAsync({
@@ -129,10 +143,10 @@ class SignInScreen extends React.Component {
     console.log(result);
     if (result.type === "success" && result.params !== null) {
       this.setState({ code: result.params.code });
+      await AsyncStorage.setItem("userToken", this.state.code);
+
+      this.props.navigation.navigate("App");
     }
-    console.log(this.state.code);
-    await AsyncStorage.setItem("userToken", this.state.code);
-    this.props.navigation.navigate("App");
   };
 }
 
