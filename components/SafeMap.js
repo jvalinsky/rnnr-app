@@ -122,7 +122,7 @@ class SafeMap extends Component {
             console.log("results #: " + results.length);
             for (let i = 0; i < len; i++) {
               let row = results.rows.item(i);
-              console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
+              //console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
               if (row.lat !== null) {
                 coordinates.push({
                   key: i + 1,

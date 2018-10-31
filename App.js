@@ -8,7 +8,7 @@ import {
   AsyncStorage,
   StatusBar
 } from "react-native";
-import { Constants, WebBrowser } from "expo";
+import { Constants, WebBrowser, AuthSession } from "expo";
 import {
   createSwitchNavigator,
   createStackNavigator,
@@ -17,8 +17,25 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SafeMap from "./components/SafeMap.js";
 
+const STRAVA_CLIENT_ID = 29699;
+
 class HomeScreen extends React.Component {
   static navigationOptions = { title: "Home" };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      token: null
+    };
+    this._loadTokenAsync();
+  }
+
+  _loadTokenAsync = async () => {
+    let token = await AsyncStorage.getItem("userToken");
+    this.setState({ token: token });
+    console.log("strava token: " + token);
+  };
+
   render() {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -78,7 +95,7 @@ class SignInScreen extends React.Component {
   };
 
   state = {
-    result: null
+    code: null
   };
 
   render() {
@@ -89,7 +106,7 @@ class SignInScreen extends React.Component {
           onPress={this._signInAsync}
         />
         <Button
-          title="Open WebBrowser"
+          title="Sign In with Strava"
           onPress={this._handlePressButtonAsync}
         />
       </View>
@@ -97,14 +114,25 @@ class SignInScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await AsyncStorage.setItem("userToken", "abc");
     this.props.navigation.navigate("App");
   };
   _handlePressButtonAsync = async () => {
-    let result = await WebBrowser.openAuthSessionAsync(
-      "https://www.strava.com/oauth/authorize?client_id=29699&response_type=code&redirect_uri=http://localhost&approval_prompt=force"
-    );
-    this.setState({ result });
+    let redirectUrl = AuthSession.getRedirectUrl();
+    console.log(redirectUrl);
+    let result = await AuthSession.startAsync({
+      authUrl:
+        `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}` +
+        `&response_type=code&redirect_uri=${redirectUrl}&approval_prompt=force`
+    }).catch(err => {
+      console.log(err);
+    });
+    console.log(result);
+    if (result.type === "success" && result.params !== null) {
+      this.setState({ code: result.params.code });
+    }
+    console.log(this.state.code);
+    await AsyncStorage.setItem("userToken", this.state.code);
+    this.props.navigation.navigate("App");
   };
 }
 
