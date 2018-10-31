@@ -8,6 +8,7 @@ import {
   AsyncStorage,
   StatusBar
 } from "react-native";
+import { Constants, WebBrowser } from "expo";
 import {
   createSwitchNavigator,
   createStackNavigator,
@@ -76,10 +77,21 @@ class SignInScreen extends React.Component {
     title: "Please sign in"
   };
 
+  state = {
+    result: null
+  };
+
   render() {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Button title="Sign in!" onPress={this._signInAsync} />
+        <Button
+          title="Don't use Strava, just take me to the app"
+          onPress={this._signInAsync}
+        />
+        <Button
+          title="Open WebBrowser"
+          onPress={this._handlePressButtonAsync}
+        />
       </View>
     );
   }
@@ -87,6 +99,12 @@ class SignInScreen extends React.Component {
   _signInAsync = async () => {
     await AsyncStorage.setItem("userToken", "abc");
     this.props.navigation.navigate("App");
+  };
+  _handlePressButtonAsync = async () => {
+    let result = await WebBrowser.openAuthSessionAsync(
+      "https://www.strava.com/oauth/authorize?client_id=29699&response_type=code&redirect_uri=http://localhost&approval_prompt=force"
+    );
+    this.setState({ result });
   };
 }
 
@@ -136,3 +154,6 @@ export default class App extends React.Component {
     return <RootStack />;
   }
 }
+
+// oauth url strava rnnr app:
+//
