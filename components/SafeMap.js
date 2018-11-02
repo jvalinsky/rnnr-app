@@ -57,6 +57,18 @@ function openCB() {
 
 var DB = null;
 
+function getPinColor(offense) {
+  if (offense.includes("2")) {
+    return "#FFA500";
+  }
+
+  if (offense.includes("3")) {
+    return "#FF0000";
+  }
+
+  return "#ffff00";
+}
+
 class SafeMap extends Component {
   constructor(props) {
     super(props);
@@ -73,15 +85,26 @@ class SafeMap extends Component {
     };
 
     this._loadDBAsync();
-    console.log(FileSystem.documentDirectory);
-    this._loadRunAsync();
-  }
-
-  componentDidMount() {
     this._getLocationAsync();
+    this._getStravaDataAsync();
   }
 
-  _loadRunAsync = async () => {};
+  componentDidMount() {}
+
+  _getStravaDataAsync = async () => {
+    try {
+      let response = await fetch(
+        `https://www.strava.com/api/v3/athlete&access_token=${
+          this.props.tokenInfo.access_token
+        }`
+      );
+      let responseJson = await response.json();
+      console.log("strava athlete data");
+      console.log(responseJson);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   _loadDBAsync = async () => {
     await FileSystem.downloadAsync(
@@ -89,9 +112,6 @@ class SafeMap extends Component {
       `${FileSystem.documentDirectory}Rnnr.db.sqlite`
     );
 
-    console.log(
-      "Finished downloading " + `${FileSystem.documentDirectory}Rnnr.db.sqlite`
-    );
     DB = SQLite.openDatabase(
       "Rnnr.db.sqlite",
       "3.0",
@@ -104,28 +124,22 @@ class SafeMap extends Component {
   };
 
   _queryAsync = async () => {
-    console.log("query is being called");
-
     DB.transaction(
       (tx, results) => {
         tx.executeSql(
           "SELECT lat, lon, offense FROM offenders  WHERE lat IS NOT NULL",
           [],
           (tx, results) => {
-            console.log("Query completed");
-
             // Get rows with Web SQL Database spec compliance.
 
             var len = results.rows.length;
             var coordinates = [];
-            console.log("results #: " + results.length);
             for (let i = 0; i < len; i++) {
               let row = results.rows.item(i);
-              //console.log(`Lat: ${row.lat}, Lon: ${row.lon}`);
               if (row.lat !== null) {
                 coordinates.push({
                   key: i + 1,
-                  pinColor: "#ff0000",
+                  pinColor: getPinColor(row.offense),
                   offense: row.offense,
                   coordinate: { latitude: row.lat, longitude: row.lon }
                 });
@@ -166,7 +180,6 @@ class SafeMap extends Component {
         longitudeDelta: LONGITUDE_DELTA
       }
     });
-    console.log(this.state.region);
   };
 
   _getLocationAsync = async () => {
