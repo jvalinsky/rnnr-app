@@ -20,8 +20,11 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import SafeMap from "./components/SafeMap.js";
 
-const STRAVA_CLIENT_ID = processs.env.CLIENT_ID;
-const STRAVA_CLIENT_SECRET = process.env.CLIENT_SECRET;
+// Do Not commit API secrets!!!
+// Need to figure out a good strategy for handling keys
+// to prevent accidental leaking via version control
+const STRAVA_CLIENT_ID = null;
+const STRAVA_CLIENT_SECRET = null;
 
 const styles = StyleSheet.create({
   button: {
