@@ -2,7 +2,7 @@
 React Native App for Rnnr DandyHacks Fall 2018 project.
 
 App was designed for keeping runners safe by informing them of local hazards such as
-registered sex offenders that lived near where they ran. The application was developed
+registered sex offenders that lived near where they run. The application was developed
 in javascript using [React Native](https://facebook.github.io/react-native/) and the [Expo framework](https://expo.io/).
 WIP support for Strava API to inform users of the safety of their runs.
 
